@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload JaCoCo coverage report  # Guardar reportes
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: build/reports/jacoco/test/html/
@@ -84,14 +84,14 @@ jobs:
 
       - name: Upload test results  # Guardar resultados de tests
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: build/reports/tests/test/
 
       - name: Upload build artifacts  # Guardar JAR generado
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: application-jar
           path: build/libs/*.jar
