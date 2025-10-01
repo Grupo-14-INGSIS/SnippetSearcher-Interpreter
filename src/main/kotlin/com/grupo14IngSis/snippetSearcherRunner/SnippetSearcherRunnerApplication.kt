@@ -1,4 +1,4 @@
-package com.Grupo14IngSis.SnippetSearcher_Runner
+package com.grupo14IngSis.snippetSearcherRunner
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class SnippetSearcherRunnerApplication
 
 fun main(args: Array<String>) {
-	runApplication<SnippetSearcherRunnerApplication>(*args)
+    runApplication<SnippetSearcherRunnerApplication>(*args)
 }
