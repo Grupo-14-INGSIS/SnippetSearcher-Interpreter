@@ -4,6 +4,8 @@
 # Ignore Gradle build output directory
 build
 
+.env
+
 HELP.md
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
