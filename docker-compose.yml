@@ -1,0 +1,8 @@
+services:
+  api:
+    container_name: "runner"
+    build:
+      context: .
+      dockerfile: Dockerfile.multi
+    ports:
+      - 8002:8080
