@@ -16,10 +16,10 @@ plugins {
     id 'org.springframework.boot' version '3.5.6'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
+    id 'application'
 }
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
-apply plugin: 'application'
 apply plugin: 'jacoco'  // <-- AGREGÁ ESTA LÍNEA
 
 
@@ -40,11 +40,11 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     testImplementation "org.jetbrains.kotlin:kotlin-test"
     testImplementation "org.junit.jupiter:junit-jupiter:5.9.3"
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
-    runtimeOnly 'org.postgresql:postgresql'
+    //runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -95,7 +95,7 @@ tasks.named('test') {
 }
 
 application {
-    mainClass = 'MainKt'
+    mainClass = 'com.grupo14IngSis.snippetSearcherRunner.SnippetSearcherRunnerApplicationKt'
 }
 
 kotlin {
