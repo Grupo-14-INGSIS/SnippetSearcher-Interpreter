@@ -6,3 +6,6 @@ services:
       dockerfile: Dockerfile.multi
     ports:
       - 8002:8080
+    environment:
+      - SNIPPET_SERVICE_URL=http://app:8080
+      - FORMATTER_URL=http://formatter:8080
