@@ -5,5 +5,5 @@ enum class LintingJobStatus {
     PROCESSING,
     COMPLETED,
     FAILED,
-    RETRYING
+    RETRYING,
 }

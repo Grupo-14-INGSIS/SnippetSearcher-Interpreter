@@ -1,13 +1,13 @@
 package com.grupo14IngSis.snippetSearcherRunner.events
 
 import com.grupo14IngSis.snippetSearcherRunner.linting.LintingJobService
+import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.slf4j.LoggerFactory
 
 @Component
 class RuleModifiedEventListener(
-    private val lintingJobService: LintingJobService
+    private val lintingJobService: LintingJobService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -16,13 +16,13 @@ class RuleModifiedEventListener(
         logger.info("Received RuleModifiedEvent: rule=${event.ruleId}, user=${event.userId}, ruleName=${event.ruleName}")
 
         try {
-            val job = lintingJobService.createLintingJob(
-                ruleId = event.ruleId,
-                userId = event.userId
-            )
+            val job =
+                lintingJobService.createLintingJob(
+                    ruleId = event.ruleId,
+                    userId = event.userId,
+                )
 
             logger.info("Created linting job ${job.id} with ${job.totalSnippets} snippets to lint for user ${event.userId}")
-
         } catch (e: Exception) {
             logger.error("Error creating linting job for rule ${event.ruleId} and user ${event.userId}", e)
         }
@@ -35,5 +35,5 @@ class RuleModifiedEventListener(
 data class RuleModifiedEvent(
     val ruleId: String,
     val userId: String,
-    val ruleName: String
+    val ruleName: String,
 )

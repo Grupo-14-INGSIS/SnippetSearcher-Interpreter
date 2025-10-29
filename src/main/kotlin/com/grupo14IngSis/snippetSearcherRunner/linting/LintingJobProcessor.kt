@@ -1,15 +1,15 @@
 package com.grupo14IngSis.snippetSearcherRunner.linting
 
+import com.grupo14IngSis.snippetSearcherRunner.client.SnippetDto
+import com.grupo14IngSis.snippetSearcherRunner.client.SnippetServiceClient
+import com.grupo14IngSis.snippetSearcherRunner.linting.dto.LintViolation
 import com.grupo14IngSis.snippetSearcherRunner.linting.dto.LintingJob
 import com.grupo14IngSis.snippetSearcherRunner.linting.dto.LintingJobStatus
-import com.grupo14IngSis.snippetSearcherRunner.linting.dto.SnippetLintResult
 import com.grupo14IngSis.snippetSearcherRunner.linting.dto.LintingResult
-import com.grupo14IngSis.snippetSearcherRunner.linting.dto.LintViolation
-import com.grupo14IngSis.snippetSearcherRunner.client.SnippetServiceClient
-import com.grupo14IngSis.snippetSearcherRunner.client.SnippetDto
+import com.grupo14IngSis.snippetSearcherRunner.linting.dto.SnippetLintResult
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.slf4j.LoggerFactory
 import reactor.util.retry.Retry
 import java.time.Duration
 
@@ -17,7 +17,7 @@ import java.time.Duration
 class LintingJobProcessor(
     private val webClient: WebClient,
     private val lintingJobRepository: LintingJobRepository,
-    private val snippetServiceClient: SnippetServiceClient
+    private val snippetServiceClient: SnippetServiceClient,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val linterUrl = System.getenv("LINTER_URL") ?: "http://linter:8080"
@@ -32,7 +32,7 @@ class LintingJobProcessor(
             logger.info("Starting linting job ${job.id} for rule ${job.ruleId}")
 
             lintingJobRepository.save(
-                job.copy(status = LintingJobStatus.PROCESSING)
+                job.copy(status = LintingJobStatus.PROCESSING),
             )
 
             val snippets = getSnippetsToLint(job)
@@ -42,8 +42,8 @@ class LintingJobProcessor(
                 lintingJobRepository.save(
                     job.copy(
                         status = LintingJobStatus.COMPLETED,
-                        processedSnippets = 0
-                    )
+                        processedSnippets = 0,
+                    ),
                 )
                 return
             }
@@ -60,19 +60,21 @@ class LintingJobProcessor(
             lintingJobRepository.save(
                 updatedJob!!.copy(
                     status = LintingJobStatus.COMPLETED,
-                    processedSnippets = snippets.size
-                )
+                    processedSnippets = snippets.size,
+                ),
             )
 
             logger.info("Completed linting job ${job.id}. Processed ${snippets.size} snippets, ${updatedJob.passedSnippets} passed")
-
         } catch (e: Exception) {
             logger.error("Error processing linting job ${job.id}", e)
             handleJobFailure(job, e)
         }
     }
 
-    private suspend fun processBatch(job: LintingJob, snippets: List<SnippetDto>) {
+    private suspend fun processBatch(
+        job: LintingJob,
+        snippets: List<SnippetDto>,
+    ) {
         snippets.forEach { snippet ->
             try {
                 logger.debug("Linting snippet ${snippet.id}")
@@ -80,73 +82,79 @@ class LintingJobProcessor(
 
                 if (result.success) {
                     // Guardar resultado del linting
-                    val lintingResult = LintingResult(
-                        snippetId = snippet.id,
-                        passed = result.passed,
-                        violations = result.violations
-                    )
+                    val lintingResult =
+                        LintingResult(
+                            snippetId = snippet.id,
+                            passed = result.passed,
+                            violations = result.violations,
+                        )
 
                     lintingJobRepository.addLintingResult(job.id, snippet.id, lintingResult)
 
                     logger.debug(
                         "Snippet ${snippet.id} linting result: ${if (result.passed) "PASSED" else "FAILED"} " +
-                                "with ${result.violations.size} violations"
+                            "with ${result.violations.size} violations",
                     )
                 } else {
                     logger.warn("Failed to lint snippet ${snippet.id}: ${result.error}")
                     lintingJobRepository.markAsFailed(
                         jobId = job.id,
                         failedSnippetId = snippet.id,
-                        error = result.error ?: "Unknown linting error"
+                        error = result.error ?: "Unknown linting error",
                     )
                 }
-
             } catch (e: Exception) {
                 logger.error("Error processing snippet ${snippet.id}", e)
                 lintingJobRepository.markAsFailed(
                     jobId = job.id,
                     failedSnippetId = snippet.id,
-                    error = e.message ?: "Unknown error"
+                    error = e.message ?: "Unknown error",
                 )
             }
         }
     }
 
-    private suspend fun lintSnippet(snippet: SnippetDto, ruleId: String): SnippetLintResult {
+    private suspend fun lintSnippet(
+        snippet: SnippetDto,
+        ruleId: String,
+    ): SnippetLintResult {
         return try {
             logger.debug("Calling linter service for snippet ${snippet.id}")
 
             // El linter devuelve una lista de violaciones
-            val response = webClient.post()
-                .uri("$linterUrl/lint")
-                .bodyValue(mapOf(
-                    "content" to snippet.content,
-                    "ruleId" to ruleId,
-                    "language" to snippet.language
-                ))
-                .retrieve()
-                .bodyToMono(LinterResponse::class.java)
-                .retryWhen(
-                    Retry.backoff(MAX_RETRIES, Duration.ofSeconds(1))
-                        .maxBackoff(Duration.ofSeconds(10))
-                        .doBeforeRetry { signal ->
-                            logger.warn("Retrying lint request for snippet ${snippet.id}, attempt ${signal.totalRetries() + 1}")
-                        }
-                )
-                .block()
+            val response =
+                webClient.post()
+                    .uri("$linterUrl/lint")
+                    .bodyValue(
+                        mapOf(
+                            "content" to snippet.content,
+                            "ruleId" to ruleId,
+                            "language" to snippet.language,
+                        ),
+                    )
+                    .retrieve()
+                    .bodyToMono(LinterResponse::class.java)
+                    .retryWhen(
+                        Retry.backoff(MAX_RETRIES, Duration.ofSeconds(1))
+                            .maxBackoff(Duration.ofSeconds(10))
+                            .doBeforeRetry { signal ->
+                                logger.warn("Retrying lint request for snippet ${snippet.id}, attempt ${signal.totalRetries() + 1}")
+                            },
+                    )
+                    .block()
 
             SnippetLintResult(
                 snippetId = snippet.id,
                 success = true,
                 passed = response?.violations?.isEmpty() ?: true,
-                violations = response?.violations ?: emptyList()
+                violations = response?.violations ?: emptyList(),
             )
         } catch (e: Exception) {
             logger.error("Error calling linter service for snippet ${snippet.id}", e)
             SnippetLintResult(
                 snippetId = snippet.id,
                 success = false,
-                error = e.message ?: "Linter service error"
+                error = e.message ?: "Linter service error",
             )
         }
     }
@@ -166,23 +174,26 @@ class LintingJobProcessor(
         }
     }
 
-    private fun handleJobFailure(job: LintingJob, error: Exception) {
+    private fun handleJobFailure(
+        job: LintingJob,
+        error: Exception,
+    ) {
         if (job.retryCount < MAX_RETRIES) {
             logger.warn("Job ${job.id} failed, scheduling retry ${job.retryCount + 1}/$MAX_RETRIES")
             lintingJobRepository.save(
                 job.copy(
                     status = LintingJobStatus.PENDING,
                     retryCount = job.retryCount + 1,
-                    errorMessage = "Retry ${job.retryCount + 1}: ${error.message}"
-                )
+                    errorMessage = "Retry ${job.retryCount + 1}: ${error.message}",
+                ),
             )
         } else {
             logger.error("Job ${job.id} failed after $MAX_RETRIES retries")
             lintingJobRepository.save(
                 job.copy(
                     status = LintingJobStatus.FAILED,
-                    errorMessage = "Max retries exceeded: ${error.message}"
-                )
+                    errorMessage = "Max retries exceeded: ${error.message}",
+                ),
             )
         }
     }
@@ -190,5 +201,5 @@ class LintingJobProcessor(
 
 // Response del servicio de linting
 data class LinterResponse(
-    val violations: List<LintViolation>
+    val violations: List<LintViolation>,
 )

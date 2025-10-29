@@ -64,14 +64,20 @@ class FormattingEventPublisher(
 
         applicationEventPublisher.publishEvent(event)
     }
-    fun publishRuleModifiedEvent(ruleId: String, userId: String, ruleName: String) {
+
+    fun publishRuleModifiedEvent(
+        ruleId: String,
+        userId: String,
+        ruleName: String,
+    ) {
         logger.info("Publishing RuleModifiedEvent for rule=$ruleId, user=$userId")
 
-        val event = RuleModifiedEvent(
-            ruleId = ruleId,
-            userId = userId,
-            ruleName = ruleName
-        )
+        val event =
+            RuleModifiedEvent(
+                ruleId = ruleId,
+                userId = userId,
+                ruleName = ruleName,
+            )
 
         applicationEventPublisher.publishEvent(event)
 
@@ -95,5 +101,5 @@ data class FormattingJobFailedEvent(
 data class RuleModifiedEvent(
     val ruleId: String,
     val userId: String,
-    val ruleName: String
+    val ruleName: String,
 )

@@ -8,15 +8,16 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/linting-jobs")
 class LintingJobController(
-    private val lintingJobService: LintingJobService
+    private val lintingJobService: LintingJobService,
 ) {
-
     /**
      * GET /api/linting-jobs/{jobId}
      * Obtiene el estado y resultados de un trabajo de linting
      */
     @GetMapping("/{jobId}")
-    fun getJobStatus(@PathVariable jobId: String): ResponseEntity<LintingJob> {
+    fun getJobStatus(
+        @PathVariable jobId: String,
+    ): ResponseEntity<LintingJob> {
         return lintingJobService.getJobStatus(jobId)
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()

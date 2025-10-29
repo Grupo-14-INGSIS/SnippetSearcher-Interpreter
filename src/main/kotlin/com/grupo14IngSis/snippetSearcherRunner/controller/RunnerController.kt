@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/internal/snippets")
 class RunnerController(private val snippetService: SnippetService) {
-
     // Endpoint llamado por SnippetSearcher-App
     @PostMapping
-    fun processAndSave(@RequestBody request: SnippetCreationRequest): ResponseEntity<SnippetCreationResponse> {
+    fun processAndSave(
+        @RequestBody request: SnippetCreationRequest,
+    ): ResponseEntity<SnippetCreationResponse> {
         // La llamada puede lanzar SnippetValidationException
         val response = snippetService.validateAndSave(request)
 
@@ -32,7 +33,7 @@ class RunnerController(private val snippetService: SnippetService) {
             message = e.message,
             rule = e.rule,
             line = e.line,
-            column = e.column
+            column = e.column,
         )
     }
 }

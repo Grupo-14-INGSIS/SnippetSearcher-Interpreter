@@ -9,7 +9,7 @@ import java.time.Duration
 
 @Repository
 class LintingJobRepository(
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
 ) {
     companion object {
         private const val JOB_KEY_PREFIX = "linting:job:"
@@ -43,37 +43,51 @@ class LintingJobRepository(
         processedSnippets: Int,
         passedSnippets: Int,
         lastSnippetId: String,
-        status: LintingJobStatus
+        status: LintingJobStatus,
     ) {
         findById(jobId)?.let { job ->
-            save(job.copy(
-                processedSnippets = processedSnippets,
-                passedSnippets = passedSnippets,
-                lastProcessedSnippetId = lastSnippetId,
-                status = status
-            ))
+            save(
+                job.copy(
+                    processedSnippets = processedSnippets,
+                    passedSnippets = passedSnippets,
+                    lastProcessedSnippetId = lastSnippetId,
+                    status = status,
+                ),
+            )
         }
     }
 
-    fun addLintingResult(jobId: String, snippetId: String, result: LintingResult) {
+    fun addLintingResult(
+        jobId: String,
+        snippetId: String,
+        result: LintingResult,
+    ) {
         findById(jobId)?.let { job ->
             val updatedResults = job.lintingResults + (snippetId to result)
-            save(job.copy(
-                lintingResults = updatedResults,
-                processedSnippets = job.processedSnippets + 1,
-                passedSnippets = if (result.passed) job.passedSnippets + 1 else job.passedSnippets,
-                lastProcessedSnippetId = snippetId
-            ))
+            save(
+                job.copy(
+                    lintingResults = updatedResults,
+                    processedSnippets = job.processedSnippets + 1,
+                    passedSnippets = if (result.passed) job.passedSnippets + 1 else job.passedSnippets,
+                    lastProcessedSnippetId = snippetId,
+                ),
+            )
         }
     }
 
-    fun markAsFailed(jobId: String, failedSnippetId: String, error: String) {
+    fun markAsFailed(
+        jobId: String,
+        failedSnippetId: String,
+        error: String,
+    ) {
         findById(jobId)?.let { job ->
-            save(job.copy(
-                failedSnippets = job.failedSnippets + failedSnippetId,
-                errorMessage = error,
-                status = LintingJobStatus.FAILED
-            ))
+            save(
+                job.copy(
+                    failedSnippets = job.failedSnippets + failedSnippetId,
+                    errorMessage = error,
+                    status = LintingJobStatus.FAILED,
+                ),
+            )
         }
     }
 }
