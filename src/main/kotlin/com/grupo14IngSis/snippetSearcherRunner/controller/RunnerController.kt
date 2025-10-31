@@ -52,6 +52,16 @@ class RunnerController(private val snippetService: SnippetService) {
         return ResponseEntity.ok(snippet)
     }
 
+    // ========== OBTENER TODOS LOS SNIPPETS DEL USUARIO ==========
+    @GetMapping
+    fun getAllSnippets(
+        @RequestHeader("X-User-Id") userId: String
+    ): ResponseEntity<List<Snippet>> {
+        val snippets = snippetService.getAllSnippetsByUser(userId)
+
+        return ResponseEntity.ok(snippets)
+    }
+
     // ========== MANEJADOR DE EXCEPCIONES ==========
     @ExceptionHandler(SnippetValidationException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

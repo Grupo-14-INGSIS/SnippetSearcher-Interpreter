@@ -132,6 +132,12 @@ class SnippetService(/* private val snippetRepository: SnippetRepository */) {
         return snippet
     }
 
+    // ========== OBTENER TODOS LOS SNIPPETS DEL USUARIO ==========
+    fun getAllSnippetsByUser(userId: String): List<Snippet> {
+        // Filtrar snippets que pertenecen al usuario
+        return snippetsDB.values.filter { it.ownerId == userId }
+    }
+
     // ========== VALIDACIÓN DE CÓDIGO ==========
     // Simulación del parser según las "Notas" del caso de uso
     private fun validateCode(
