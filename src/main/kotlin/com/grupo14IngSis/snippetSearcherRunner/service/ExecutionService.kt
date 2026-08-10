@@ -21,12 +21,7 @@ class ExecutionService(
         environment: Map<String, String>,
     ): ExecutionResponse {
         val cacheKey = "snippet:$snippetId:$version"
-        val cachedResult = snippetCacheService.getFromCache(cacheKey)
-        if (cachedResult != null) {
-            // Assuming the cached result is a JSON representation of ExecutionResponse
-            // You might need a more robust JSON deserialization here
-            return ExecutionResponse(ExecutionEventType.COMPLETED, cachedResult.lines())
-        }
+        // Always execute snippet fresh to avoid returning stale cached errors
 
         if (activeExecutions.size >= maxConcurrentExecutions) {
             return ExecutionResponse(
