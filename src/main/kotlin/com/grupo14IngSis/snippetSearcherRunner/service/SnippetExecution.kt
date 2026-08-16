@@ -51,6 +51,7 @@ class SnippetExecution(
                             onOutput(output.toString())
                         },
                     )
+
                     onOutput("Execution finished")
                     status = ExecutionEventType.COMPLETED
                 } catch (e: CancellationException) {
