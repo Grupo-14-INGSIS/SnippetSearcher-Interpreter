@@ -5,6 +5,7 @@ import com.grupo14IngSis.snippetSearcherRunner.client.AssetServiceClient
 import com.grupo14IngSis.snippetSearcherRunner.dto.ExecutionEventType
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,19 +43,20 @@ class ExecutionServiceTest {
     }
 
     @Test
-    fun `should return cached result if available`() {
+    fun `should execute snippet fresh and save to cache`() {
         val snippetId = "123"
         val userId = "user"
         val version = "1.0"
-        val cachedOutput = "Hello from cache"
+        val snippet = "println(\"Hello, World!\");"
         val cacheKey = "snippet:$snippetId:$version"
 
-        every { snippetCacheService.getFromCache(cacheKey) } returns cachedOutput
+        every { assetServiceClient.getAsset("snippets", snippetId) } returns snippet
 
         val output = executionService.executeSnippet(snippetId, userId, version, emptyMap())
 
         assertEquals(ExecutionEventType.COMPLETED, output.status)
-        assertEquals(listOf(cachedOutput), output.message)
+        assertEquals(listOf("Hello, World!", "Execution finished"), output.message)
+        verify { snippetCacheService.saveToCache(cacheKey, "Hello, World!\nExecution finished") }
     }
 
     @Test
