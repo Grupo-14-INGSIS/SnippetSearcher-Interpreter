@@ -64,7 +64,9 @@ class TestingJobController(
         val status = execution.getStatus()
         if (status == ExecutionEventType.COMPLETED) {
             val actual = execution.getOutput().toMutableList()
-            actual.removeLast()
+            if (actual.isNotEmpty() && actual.last() == "Execution finished") {
+                actual.removeLast()
+            }
             result =
                 if (actual == request.expected) {
                     TestResponse(

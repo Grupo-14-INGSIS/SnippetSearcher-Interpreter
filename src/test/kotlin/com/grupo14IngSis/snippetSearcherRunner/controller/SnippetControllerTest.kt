@@ -51,7 +51,7 @@ class SnippetControllerTest {
         val snippetId = "test-snippet"
         val userId = "test-user"
         val language = "printscript"
-        val snippetContent = "Updated content"
+        val snippetContent = "println(\"Updated content\");"
         every { assetServiceClient.postAsset(container, snippetId, snippetContent) } returns 200
         every { assetServiceClient.getAsset(container, snippetId) } returns "something"
         every {
@@ -79,7 +79,7 @@ class SnippetControllerTest {
         val snippetId = "test-snippet"
         val userId = "test-user"
         val language = "printscript"
-        val snippetContent = "New content"
+        val snippetContent = "println(\"New content\");"
         every { assetServiceClient.postAsset(container, snippetId, snippetContent) } returns 201
         every { assetServiceClient.getAsset(container, snippetId) } returns null
         every {

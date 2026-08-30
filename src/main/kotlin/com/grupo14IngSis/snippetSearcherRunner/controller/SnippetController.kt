@@ -7,6 +7,7 @@ import com.grupo14IngSis.snippetSearcherRunner.dto.SnippetCreationRequest
 import com.grupo14IngSis.snippetSearcherRunner.dto.SnippetUpdateRequest
 import com.grupo14IngSis.snippetSearcherRunner.plugins.AnalyzerPlugin
 import com.grupo14IngSis.snippetSearcherRunner.plugins.FormattingPlugin
+import com.grupo14IngSis.snippetSearcherRunner.plugins.ValidationPlugin
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -69,6 +70,17 @@ class SnippetController(
         @PathVariable snippetId: String,
         @RequestBody request: SnippetCreationRequest,
     ): ResponseEntity<Any> {
+        val validationPlugin = ValidationPlugin()
+        val validationResult = validationPlugin.run(request.snippet, mapOf("version" to "1.1")) as String
+        val hasError = validationResult.contains("ERROR", ignoreCase = true) ||
+            validationResult.contains("Exception", ignoreCase = true) ||
+            validationResult.contains("Syntax error", ignoreCase = true) ||
+            validationResult.contains("Parsing error", ignoreCase = true)
+
+        if (hasError) {
+            return ResponseEntity.badRequest().body(validationResult)
+        }
+
         val snippetNotExists = assetServiceClient.getAsset(container, snippetId) == null
         if (snippetNotExists) {
             assetServiceClient.postAsset(container, snippetId, request.snippet)
@@ -100,6 +112,17 @@ class SnippetController(
         @PathVariable snippetId: String,
         @RequestBody request: SnippetUpdateRequest,
     ): ResponseEntity<Any> {
+        val validationPlugin = ValidationPlugin()
+        val validationResult = validationPlugin.run(request.snippet, mapOf("version" to "1.1")) as String
+        val hasError = validationResult.contains("ERROR", ignoreCase = true) ||
+            validationResult.contains("Exception", ignoreCase = true) ||
+            validationResult.contains("Syntax error", ignoreCase = true) ||
+            validationResult.contains("Parsing error", ignoreCase = true)
+
+        if (hasError) {
+            return ResponseEntity.badRequest().body(validationResult)
+        }
+
         val snippetExists = assetServiceClient.getAsset(container, snippetId) != null
         if (snippetExists) {
             assetServiceClient.postAsset(container, snippetId, request.snippet)
